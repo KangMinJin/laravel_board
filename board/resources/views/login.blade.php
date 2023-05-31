@@ -4,9 +4,10 @@
 
 @section('contents')
     <h1>로그인</h1>
-    {{-- <div>
-    {{isset($success) ? $success : ""}}
-    </div> --}}
+    {{-- session에 $success가 있으면 메세지 출력, 없으면 빈 문자열. --}}
+    <div>
+    {!! session()->has('success') ? session('success') : ""!!}
+    </div>
     @include('layout.errorsvalidate')
     <form action="{{route('users.login.post')}}" method="post">
         @csrf
