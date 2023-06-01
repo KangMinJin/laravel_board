@@ -27,7 +27,8 @@ class BoardsController extends Controller
             return redirect()->route('users.login');
         }
         
-        $result = Boards::select(['id', 'title', 'hits', 'created_at', 'updated_at'])->orderBy('hits', 'desc')->get();
+        $result = Boards::select(['id', 'title', 'hits', 'created_at', 'updated_at'])
+        ->orderBy('hits', 'desc')->get();
         return view('list')->with('data', $result);
     }
 
