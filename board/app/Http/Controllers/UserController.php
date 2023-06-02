@@ -12,10 +12,24 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     function login() {
+
+        // * 로그 단계별로
+        $arr['key'] = 'test'; 
+        $arr['kim'] = 'park'; 
+        Log::emergency('emergency', $arr);
+        Log::alert('alert', $arr);
+        Log::critical('critical', $arr);
+        Log::error('error', $arr);
+        Log::warning('warning', $arr);
+        Log::notice('notice', $arr);
+        Log::info('info', $arr);
+        Log::debug('debug', $arr);
+
         return view('login');
     }
 
@@ -29,6 +43,7 @@ class UserController extends Controller
         // 유저정보 습득
         $user = User::where('email', $req->email)->first();
         if(!$user || !(Hash::check($req->password, $user->password))) {
+            // ? Log::debug($req->password." : ". $user->password); 이런식으로 디버그 넣으면 된다.
             $error = '아이디와 비밀번호를 확인해 주세요.';
             return redirect()->back()->with('error', $error);
         }
@@ -37,7 +52,9 @@ class UserController extends Controller
         Auth::login($user);
         if (Auth::check()) {
             session($user->only('id')); // 세션에 인증된 회원 pk 등록
-            return redirect()->intended(route('boards.index')); // intended 사용 시 전에 있던 데이터 날리고 redirect
+            return redirect()->intended(route('boards.index')); // * intended 사용 시 전에 있던 데이터 날리고 redirect
+            // * 유저 인증 작업 후 인증 하기 직전 페이지로 돌아갈 수 있도록 해주는 메서드. (그 페이지가 없다면 우리가 설정해둔 페이지로 이동하게 해 준다)
+            // * 미들웨어 관련된 메서드...! 일단 유저 인증 작업(성공) 후 intended 넣는다고 생각하면 됨...!
         } else {
             $error = '인증작업 에러';
             return redirect()->back()->with('error', $error);
@@ -97,6 +114,7 @@ class UserController extends Controller
         // * 서버 리소스는 들지만 보안적으로는 더 나은 방법.
         // ? $user = User::findOrFail(Auth::User()->id);
         return view('useredit')->with('data', $user);
+        // ! with는 view에 붙어있을 땐 view에 저장한다.
     }
     function editpost(Request $req) {
         $arrKey = []; // 수정할 항목을 담는 변수
@@ -106,6 +124,7 @@ class UserController extends Controller
         // 기존 비밀번호 체크
         if (!(Hash::check($req->passwordnow, $baseUser->password))) {
             return redirect()->back()->with('error', '기존 비밀번호를 확인해 주세요.');
+            // ! with는 redirect에 붙어있을 땐 session에 저장한다.(통신 방식의 차이때문에 view와 redirect 각각 데이터가 저장되는곳이 다르다)
         }
 
         // 수정할 항목을 배열에 담는 처리
